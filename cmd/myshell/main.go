@@ -4,15 +4,13 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 )
 
-const (
-	ExitCmd = "exit"
-	EchoCmd = "echo"
-	TypeCmd = "type"
-)
+var builtInCommands = []string{"exit", "echo", "type"}
 
 func main() {
 	paths := strings.Split(os.Getenv("PATH"), ":")
@@ -21,26 +19,26 @@ func main() {
 	for {
 		fmt.Fprint(os.Stdout, "$ ")
 
-		command, err := reader.ReadString('\n')
+		userInput, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
 		}
 
-		command = strings.TrimRight(command, "\n")
+		command := strings.TrimRight(userInput, "\n")
 		cmdWithArgs := strings.Split(command, " ")
 
 		command = cmdWithArgs[0]
 		args := cmdWithArgs[1:]
 
 		switch command {
-		case ExitCmd:
+		case "exit":
 			os.Exit(0)
-		case EchoCmd:
+		case "echo":
 			fmt.Fprintf(os.Stdout, "%s\n", strings.Join(args, " "))
 			break
-		case TypeCmd:
+		case "type":
 			typeCmd := args[0]
-			if typeCmd == ExitCmd || typeCmd == EchoCmd || typeCmd == TypeCmd {
+			if slices.Contains(builtInCommands, typeCmd) {
 				fmt.Fprintf(os.Stdout, "%s is a shell builtin\n", typeCmd)
 				break
 			} else if path, ok := findExecutable(typeCmd, paths); ok {
@@ -51,8 +49,18 @@ func main() {
 				break
 			}
 		default:
-			fmt.Fprintf(os.Stdout, "%s: command not found\n", strings.TrimRight(command, "\n"))
+			execCommand(command, args)
 		}
+	}
+}
+
+func execCommand(command string, args []string) {
+	cmd := exec.Command(command, args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		fmt.Fprintf(os.Stdout, "%s: command not found\n", command)
 	}
 }
 
