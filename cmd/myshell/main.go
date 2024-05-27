@@ -20,34 +20,32 @@ func main() {
 		in, err := bufio.NewReader(os.Stdin).ReadString('\n')
 
 		if err != nil {
-			fmt.Println(err.Error())
+			fmt.Fprintln(os.Stdout, err.Error())
 		}
 
 		command := strings.TrimRight(in, "\n")
-		cmd_with_args := strings.Split(command, " ")
+		cmdWithArgs := strings.Split(command, " ")
 
-		command = cmd_with_args[0]
-		args := cmd_with_args[1:]
+		command = cmdWithArgs[0]
+		args := cmdWithArgs[1:]
 
 		switch command {
 		case ExitCmd:
-			if args[0] == "0" {
-				os.Exit(0)
-			}
+			os.Exit(0)
 		case EchoCmd:
-			fmt.Printf("%s\n", strings.Join(args, " "))
+			fmt.Fprintf(os.Stdout, "%s\n", strings.Join(args, " "))
 			break
 		case TypeCmd:
-			type_cmd := args[0]
-			if type_cmd == ExitCmd || type_cmd == EchoCmd || type_cmd == TypeCmd {
-				fmt.Printf("%s is a shell builtin\n", type_cmd)
+			typeCmd := args[0]
+			if typeCmd == ExitCmd || typeCmd == EchoCmd || typeCmd == TypeCmd {
+				fmt.Fprintf(os.Stdout, "%s is a shell builtin\n", typeCmd)
 				break
 			} else {
-				fmt.Printf("%s not found\n", type_cmd)
+				fmt.Fprintf(os.Stdout, "%s not found\n", typeCmd)
 				break
 			}
 		default:
-			fmt.Printf("%s: command not found\n", strings.TrimRight(command, "\n"))
+			fmt.Fprintf(os.Stdout, "%s: command not found\n", strings.TrimRight(command, "\n"))
 		}
 	}
 }
