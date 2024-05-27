@@ -10,6 +10,7 @@ import (
 const (
 	ExitCmd = "exit"
 	EchoCmd = "echo"
+	TypeCmd = "type"
 )
 
 func main() {
@@ -36,6 +37,15 @@ func main() {
 		case EchoCmd:
 			fmt.Printf("%s\n", strings.Join(args, " "))
 			break
+		case TypeCmd:
+			type_cmd := args[0]
+			if type_cmd == ExitCmd || type_cmd == EchoCmd || type_cmd == TypeCmd {
+				fmt.Printf("%s is a shell builtin\n", type_cmd)
+				break
+			} else {
+				fmt.Printf("%s not found\n", type_cmd)
+				break
+			}
 		default:
 			fmt.Printf("%s: command not found\n", strings.TrimRight(command, "\n"))
 		}
