@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -14,16 +15,18 @@ const (
 )
 
 func main() {
+	paths := strings.Split(os.Getenv("PATH"), ":")
+	reader := bufio.NewReader(os.Stdin)
+
 	for {
 		fmt.Fprint(os.Stdout, "$ ")
 
-		in, err := bufio.NewReader(os.Stdin).ReadString('\n')
-
+		command, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Fprintln(os.Stdout, err.Error())
+			fmt.Fprintln(os.Stderr, err.Error())
 		}
 
-		command := strings.TrimRight(in, "\n")
+		command = strings.TrimRight(command, "\n")
 		cmdWithArgs := strings.Split(command, " ")
 
 		command = cmdWithArgs[0]
@@ -40,6 +43,9 @@ func main() {
 			if typeCmd == ExitCmd || typeCmd == EchoCmd || typeCmd == TypeCmd {
 				fmt.Fprintf(os.Stdout, "%s is a shell builtin\n", typeCmd)
 				break
+			} else if path, ok := findExecutable(typeCmd, paths); ok {
+				fmt.Fprintf(os.Stdout, "%s is %s\n", typeCmd, path)
+				break
 			} else {
 				fmt.Fprintf(os.Stdout, "%s not found\n", typeCmd)
 				break
@@ -48,4 +54,16 @@ func main() {
 			fmt.Fprintf(os.Stdout, "%s: command not found\n", strings.TrimRight(command, "\n"))
 		}
 	}
+}
+
+func findExecutable(name string, paths []string) (string, bool) {
+	for _, path := range paths {
+		fullpath := filepath.Join(path, name)
+
+		if _, err := os.Stat(fullpath); err == nil {
+			return fullpath, true
+		}
+	}
+
+	return "", false
 }
