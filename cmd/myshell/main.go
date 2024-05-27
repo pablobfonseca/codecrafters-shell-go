@@ -4,10 +4,10 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"os/exec"
-	"path/filepath"
 	"slices"
 	"strings"
+
+	"github.com/codecrafters-io/shell-starter-go/cmd/myshell/utils"
 )
 
 var builtInCommands = []string{"exit", "echo", "type"}
@@ -24,11 +24,7 @@ func main() {
 			fmt.Fprintln(os.Stderr, err.Error())
 		}
 
-		command := strings.TrimRight(userInput, "\n")
-		cmdWithArgs := strings.Split(command, " ")
-
-		command = cmdWithArgs[0]
-		args := cmdWithArgs[1:]
+		command, args := utils.ParseUserInput(userInput)
 
 		switch command {
 		case "exit":
@@ -41,7 +37,7 @@ func main() {
 			if slices.Contains(builtInCommands, typeCmd) {
 				fmt.Fprintf(os.Stdout, "%s is a shell builtin\n", typeCmd)
 				break
-			} else if path, ok := findExecutable(typeCmd, paths); ok {
+			} else if path, ok := utils.FindExecutable(typeCmd, paths); ok {
 				fmt.Fprintf(os.Stdout, "%s is %s\n", typeCmd, path)
 				break
 			} else {
@@ -49,29 +45,7 @@ func main() {
 				break
 			}
 		default:
-			execCommand(command, args)
+			utils.ExecCommand(command, args)
 		}
 	}
-}
-
-func execCommand(command string, args []string) {
-	cmd := exec.Command(command, args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
-	if err != nil {
-		fmt.Fprintf(os.Stdout, "%s: command not found\n", command)
-	}
-}
-
-func findExecutable(name string, paths []string) (string, bool) {
-	for _, path := range paths {
-		fullpath := filepath.Join(path, name)
-
-		if _, err := os.Stat(fullpath); err == nil {
-			return fullpath, true
-		}
-	}
-
-	return "", false
 }
