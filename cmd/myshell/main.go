@@ -10,7 +10,7 @@ import (
 	"github.com/codecrafters-io/shell-starter-go/cmd/myshell/utils"
 )
 
-var builtInCommands = []string{"exit", "echo", "type"}
+var builtInCommands = []string{"exit", "echo", "type", "pwd"}
 
 func main() {
 	paths := strings.Split(os.Getenv("PATH"), ":")
@@ -41,7 +41,7 @@ func main() {
 				fmt.Fprintf(os.Stdout, "%s is %s\n", typeCmd, path)
 				break
 			} else {
-				fmt.Fprintf(os.Stdout, "%s not found\n", typeCmd)
+				fmt.Fprintf(os.Stdout, "%s: not found\n", typeCmd)
 				break
 			}
 		case "pwd":
