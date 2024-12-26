@@ -10,7 +10,7 @@ import (
 	"github.com/codecrafters-io/shell-starter-go/cmd/myshell/utils"
 )
 
-var builtInCommands = []string{"exit", "echo", "type", "pwd"}
+var builtInCommands = []string{"exit", "echo", "type", "pwd", "cd"}
 
 func main() {
 	paths := strings.Split(os.Getenv("PATH"), ":")
@@ -47,6 +47,12 @@ func main() {
 		case "pwd":
 			path, _ := os.Getwd()
 			fmt.Fprintln(os.Stdout, path)
+		case "cd":
+			path := args[0]
+			err := os.Chdir(path)
+			if err != nil {
+				fmt.Fprintf(os.Stdout, "cd: %s: No such file or directory\n", path)
+			}
 		default:
 			utils.ExecCommand(command, args)
 		}
