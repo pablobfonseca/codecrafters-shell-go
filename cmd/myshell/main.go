@@ -44,6 +44,9 @@ func main() {
 				fmt.Fprintf(os.Stdout, "%s not found\n", typeCmd)
 				break
 			}
+		case "pwd":
+			path, _ := os.Getwd()
+			fmt.Fprintln(os.Stdout, path)
 		default:
 			utils.ExecCommand(command, args)
 		}
