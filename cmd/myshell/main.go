@@ -49,8 +49,13 @@ func main() {
 			fmt.Fprintln(os.Stdout, path)
 		case "cd":
 			path := args[0]
+			home := os.Getenv("HOME")
 			if path == "~" {
-				path = os.Getenv("HOME")
+				path = home
+			}
+			if strings.HasPrefix(path, "~") {
+				path, _ = strings.CutPrefix(path, "~/")
+				path = fmt.Sprintf("%s/%s", home, path)
 			}
 			err := os.Chdir(path)
 			if err != nil {
